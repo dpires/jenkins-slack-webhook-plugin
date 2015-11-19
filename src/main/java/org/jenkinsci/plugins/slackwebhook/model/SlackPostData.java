@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.slackwebhook.model;
 
+
+
+
 public class SlackPostData {
     private String text;
     private String token;
@@ -64,7 +67,7 @@ public class SlackPostData {
         return this.channel_name;
     }
 
-    public void setTimestamp(String timetamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 

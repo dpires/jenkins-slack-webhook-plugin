@@ -1,13 +1,16 @@
 package org.jenkinsci.plugins.slackwebhook.model;
 
+
 import java.util.List;
 import java.util.ArrayList;
 
 
-public class SlackMessage {
+
+
+public class SlackAttachmentMessage {
     private List<SlackAttachment>  attachments = new ArrayList<SlackAttachment>();
 
-    public SlackMessage(SlackAttachment attachment) {
+    public SlackAttachmentMessage(SlackAttachment attachment) {
         this.attachments.add(attachment);
     }
 
@@ -17,5 +20,9 @@ public class SlackMessage {
     
     public List<SlackAttachment> getAttachments() {
         return this.attachments;
+    }
+    
+    public void setAttachments(List<SlackAttachment> attachments) {
+        this.attachments = attachments;
     }
 }

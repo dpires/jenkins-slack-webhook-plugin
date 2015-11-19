@@ -7,18 +7,20 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.io.IOException;
 
+import net.sf.json.JSONObject;
+
 import javax.servlet.ServletException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import net.sf.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 
 
+
 public class JsonResponse implements HttpResponse {
     private int status;
+
     private String json;
 
     public JsonResponse(Object obj, int status) {
@@ -32,7 +34,10 @@ public class JsonResponse implements HttpResponse {
     }
 
     @Override
-    public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object o) throws IOException, ServletException {
+    public void generateResponse(StaplerRequest req,
+        StaplerResponse rsp,
+        Object o) throws IOException, ServletException {
+
         rsp.setStatus(status);
         rsp.setContentType("application/json");
         rsp.getWriter().println(json);

@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
- This plugin exposes a endpoint to be used for a Slack outgoing webhook
+This plugin exposes an endpoint to be used by a Slack outgoing webhook
 </div>

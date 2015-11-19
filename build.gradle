@@ -22,7 +22,7 @@ dependencies {
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '0.0.1'
+version = '0.0.2'
 description = 'A Jenkins plugin that exposes functionality through a webhook for Slack'
 
 jenkinsPlugin {
