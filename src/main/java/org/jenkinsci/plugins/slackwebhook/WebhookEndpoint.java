@@ -48,7 +48,6 @@ public class WebhookEndpoint implements UnprotectedRootAction {
 
     public WebhookEndpoint() {
         globalConfig = GlobalConfiguration.all().get(GlobalConfig.class);
-        ACL.impersonate(ACL.SYSTEM);
     }
 
     @Override
@@ -98,6 +97,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     }
 
     public SlackTextMessage scheduleJob(String projectName) {
+        ACL.impersonate(ACL.SYSTEM);
         String response = "";
 
         Project project =
@@ -117,6 +117,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     }
 
     public SlackTextMessage listProjects() {
+        ACL.impersonate(ACL.SYSTEM);
         String response = "";
 
         for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
