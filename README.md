@@ -20,8 +20,8 @@ Assuming you have your Slack webhook trigger word set to 'jenkins', the followin
 ## Installation
 
 ### Slack Configuration
-1. In your slack integration settings create a new outgoing webhook
-2. In the URL field add <YOUR_JENKINS_HOST>/webhook/ (The webhook endpoint is off root)
+1. In your Slack integration settings create a new outgoing webhook
+2. In the URL field add YOUR_JENKINS_HOST/webhook/ (The webhook endpoint is off root, the final / is required)
 3. Copy the Token value
 
 ### Jenkins Configuration
