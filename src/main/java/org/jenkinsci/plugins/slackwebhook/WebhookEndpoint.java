@@ -35,6 +35,8 @@ import org.jenkinsci.plugins.slackwebhook.model.SlackTextMessage;
 import org.jenkinsci.plugins.slackwebhook.model.SlackWebhookCause;
 
 import org.jenkinsci.plugins.slackwebhook.exception.CommandRouterException;
+import org.jenkinsci.plugins.slackwebhook.exception.RouteNotFoundException;
+
 
 
 
@@ -80,26 +82,48 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         //
         this.slackUser = data.getUser_name();
 
+        CommandRouter<SlackTextMessage> router =
+            new CommandRouter<SlackTextMessage>();
+
         try {
-            SlackTextMessage msg = new CommandRouter()
-                .addRoute("^"+triggerWord+" list projects",
-                    triggerWord+" list projects", "Return a list of buildable projects",
-                    this,
-                    "listProjects")
-                .addRoute("^"+triggerWord+" run ([a-zA-Z-\\.]+)",
-                    triggerWord+" run <project_name>",
-                    "Schedule a run for <project_name>",
-                    this,
-                    "scheduleJob")
-                .addRoute("^"+triggerWord+" get ([a-zA-Z-\\.]+) #([0-9]+) log",
-                    triggerWord+" get <project-name> #<build_number> log",
-                    "Return a truncated log for build #<build_number> of <project_name>",
-                    this,
-                "getProjectLog")
-                .route(data.getText());
+            router.addRoute("^"+triggerWord+" list projects",
+                triggerWord+" list projects", "Return a list of buildable projects",
+                this,
+                "listProjects")
+            .addRoute("^"+triggerWord+" run ([a-zA-Z-\\.]+)",
+                triggerWord+" run <project_name>",
+                "Schedule a run for <project_name>",
+                this,
+                "scheduleJob")
+            .addRoute("^"+triggerWord+" get ([a-zA-Z-\\.]+) #([0-9]+) log",
+                triggerWord+" get <project-name> #<build_number> log",
+                "Return a truncated log for build #<build_number> of <project_name>",
+                this,
+            "getProjectLog");
+
+            SlackTextMessage msg = router.route(data.getText());
 
             return new JsonResponse(msg, StaplerResponse.SC_OK);
             
+        } catch (RouteNotFoundException ex) {
+
+            LOGGER.warning(ex.getMessage());
+
+            String command = ex.getRouteCommand();
+
+            String response = "*Help:*\n";
+            if (command.split("\\s+").length > 1)
+                response += "`"+command+"` _is an unknown command, try one of the following:_\n\n";
+            else
+                response += "\n";
+
+            for (CommandRouter.Route route : router.getRoutes()) {
+                response += "`"+route.command+"`\n```"+route.commandDescription+"```";
+                response += "\n\n";
+            }
+
+            return new JsonResponse(new SlackTextMessage(response), StaplerResponse.SC_OK);
+
         } catch (CommandRouterException ex) {
             return new JsonResponse(new SlackTextMessage(ex.getMessage()), StaplerResponse.SC_OK);
         }

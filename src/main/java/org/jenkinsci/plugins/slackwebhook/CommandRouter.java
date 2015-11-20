@@ -9,46 +9,52 @@ import java.util.regex.Matcher;
 
 import java.lang.reflect.Method;
 
-import org.jenkinsci.plugins.slackwebhook.model.SlackTextMessage;
-
 import org.jenkinsci.plugins.slackwebhook.exception.CommandRouterException;
+import org.jenkinsci.plugins.slackwebhook.exception.RouteNotFoundException;
 
 
 
 
-public class CommandRouter {
+public class CommandRouter<T> {
 
     public CommandRouter() { }
 
-    public List<PatternAction> routes = new ArrayList<PatternAction>();
+    public List<Route> routes = new ArrayList<Route>();
 
-    public CommandRouter addRoute(String regexRoute,
+    public CommandRouter addRoute(String regex,
         String command,
         String commandDescription,
         Object handlerInstance,
-        String handlerMethodName) {
-        this.routes.add(new PatternAction(regexRoute,
+        String handlerAction) {
+
+        this.routes.add(new CommandRouter.Route(regex,
             command,
             commandDescription,
             handlerInstance,
-            handlerMethodName));
+            handlerAction));
 
         return this;
     }
 
-    public SlackTextMessage route(String command) throws CommandRouterException {
-        SlackTextMessage message = null;
+    public List<Route> getRoutes() {
+        return this.routes;
+    }
 
-        for (PatternAction pa : routes) {
+    public T route(String command) throws CommandRouterException,
+        RouteNotFoundException {
 
-            Matcher matcher = pa.pattern.matcher(command);
+        T message = null;
+
+        for (Route pa : routes) {
+
+            Matcher matcher = pa.regex.matcher(command);
 
             boolean matches = matcher.matches();
 
             if (matches) {
     
-                Method handlerMethod = getHandlerMethod(pa.object,
-                    pa.action,
+                Method handlerMethod = getHandlerMethod(pa.handlerInstance,
+                    pa.handlerAction,
                     matcher.groupCount());
 
                 List<Object> parameters = new ArrayList<Object>();
@@ -69,7 +75,8 @@ public class CommandRouter {
                 }
                 
                 try {
-                    message = (SlackTextMessage)handlerMethod.invoke(pa.object, parametersArray);
+                    message =
+                        (T)handlerMethod.invoke(pa.handlerInstance, parametersArray);
                 } catch (Exception ex) {
                     throw new CommandRouterException(ex.getMessage());
                 }
@@ -77,20 +84,8 @@ public class CommandRouter {
             }
         }
 
-        if (message == null) {
-            String response = "*Help:*\n";
-            if (command.split("\\s+").length > 1)
-                response += "`"+command+"` _is an unknown command, try one of the following:_\n\n";
-            else
-                response += "\n";
-            
-            for (PatternAction route : routes) {
-                response += "`"+route.command+"`\n```"+route.commandDescription+"```";
-                response += "\n\n";
-            } 
-
-            throw new CommandRouterException(response);
-        }
+        if (message == null)
+            throw new RouteNotFoundException("No route found for given command", command);
 
         return message;
     }
@@ -115,22 +110,22 @@ public class CommandRouter {
         return returnMethod;
     }
 
-    private class  PatternAction {
-        public String action;
-        public Object object;
+    public static class Route {
+        public Pattern regex;
         public String command;
-        public Pattern pattern;
         public String commandDescription;
+        public Object handlerInstance;
+        public String handlerAction;
 
-        public PatternAction(String regex,
+        public Route(String regex,
             String command,
             String commandDescription,
-            Object object,
-            String action) {
+            Object handlerInstance,
+            String handlerAction) {
 
-            this.pattern = Pattern.compile(regex);
-            this.action = action;
-            this.object = object;
+            this.regex = Pattern.compile(regex);
+            this.handlerAction = handlerAction;
+            this.handlerInstance = handlerInstance;
             this.command = command;
             this.commandDescription = commandDescription;
         }
