@@ -7,8 +7,8 @@ import jenkins.model.GlobalConfiguration;
 import hudson.Extension;
 
 import hudson.model.Build;
-import hudson.model.AbstractBuild;
 import hudson.model.Project;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.UnprotectedRootAction;
 
@@ -101,6 +101,8 @@ public class WebhookEndpoint implements UnprotectedRootAction {
 
     public SlackTextMessage getProjectLog(String projectName,
         String buildNumber) {
+
+        ACL.impersonate(ACL.SYSTEM);
 
         Project project =
             Jenkins.getInstance().getItemByFullName(projectName, Project.class);
