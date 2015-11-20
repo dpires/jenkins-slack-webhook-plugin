@@ -6,6 +6,8 @@ import jenkins.model.GlobalConfiguration;
 
 import hudson.Extension;
 
+import hudson.model.Build;
+import hudson.model.AbstractBuild;
 import hudson.model.Project;
 import hudson.model.AbstractProject;
 import hudson.model.UnprotectedRootAction;
@@ -87,6 +89,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             SlackTextMessage msg = new CommandRouter()
                 .addRoute("^list projects", "jenkins list projects", "Lists buildable projects", this, "listProjects")
                 .addRoute("^run ([a-zA-Z-\\.]+)", "jenkins run <project_name>", "Schedule run for <project_name>", this, "scheduleJob")
+                .addRoute("^get ([a-zA-Z-\\.]+) #([0-9]+) log", "jenkins get <project-name> #<build_number> log", "Returns 25 lines of the log for build <build_number> of <project_name>", this, "getProjectLog")
                 .route(command);
 
             return new JsonResponse(msg, StaplerResponse.SC_OK);
@@ -94,6 +97,35 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         } catch (CommandRouterException ex) {
             return new JsonResponse(new SlackTextMessage(ex.getMessage()), StaplerResponse.SC_OK);
         }
+    }
+
+    public SlackTextMessage getProjectLog(String projectName,
+        String buildNumber) {
+
+        Project project =
+            Jenkins.getInstance().getItemByFullName(projectName, Project.class);
+
+        if (project == null)
+            return new SlackTextMessage("Could not find project ("+projectName+")\n");
+
+        AbstractBuild build =
+            project.getBuildByNumber(Integer.parseInt(buildNumber));
+
+        if (build == null)
+            return new SlackTextMessage("Could not find build #"+buildNumber+" for ("+projectName+")\n");
+
+        List<String> log = new ArrayList<String>();
+        try {
+            log = build.getLog(25);
+        } catch (IOException ex) {
+            return new SlackTextMessage("Error occured returning log: "+ex.getMessage());
+        }
+
+        String response = "";
+        for (String line : log) {
+            response += line + "\n";
+        }
+        return new SlackTextMessage(response);
     }
 
     public SlackTextMessage scheduleJob(String projectName) {

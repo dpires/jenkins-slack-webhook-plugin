@@ -4,7 +4,7 @@
 
 ## Usage
 
-Assuming you have your Slack webhook trigger word set to 'jenkins', the following commands are permitted:
+Assuming you have a Slack webhook trigger word set to 'jenkins', the following commands are available:
 
 ```
 [You]: jenkins list projects
@@ -15,6 +15,11 @@ Assuming you have your Slack webhook trigger word set to 'jenkins', the followin
 ```
 [You]: jenkins run my-project-one
 [SlackWebhookBot]: Build scheduled for my-project-one
+```
+
+```
+[You]: jenkins get my-project-one #45 log
+[SlackWebhookBot]: Build started by...
 ```
 
 ## Installation
@@ -32,11 +37,11 @@ Assuming you have your Slack webhook trigger word set to 'jenkins', the followin
 
 This plugin uses gradle wrapper, so the only dependency is a working JDK (7/8).
 
-1. To build the .hpi plugin (build/libs/slack-webhook-plugin.hpi)
+* To build the .hpi plugin (build/libs/slack-webhook-plugin.hpi)
 ```
 ./gradlew jpi
 ```
-2. To build and install in a local jenkins server running at http://localhost:8080/
+* To build and install in a local jenkins server running at http://localhost:8080/
 ```
 ./gradlew server
 ```
