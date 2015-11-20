@@ -152,11 +152,16 @@ public class WebhookEndpoint implements UnprotectedRootAction {
 
     public SlackTextMessage listProjects() {
         ACL.impersonate(ACL.SYSTEM);
-        String response = "";
+        String response = "*Projects:*\n";
 
         for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-            if (job.isBuildable())
-                response += job.getDisplayName() + "\n";
+            if (job.isBuildable()) {
+                AbstractBuild lastBuild = job.getLastBuild();
+                String buildNumber = Integer.toString(lastBuild.getNumber());
+                String status = lastBuild.getResult().toString().toLowerCase();
+                response += ">*"+job.getDisplayName() + "*\n>*Status:* _"+status+"_\n>*Last Build:* #"+buildNumber;
+                response += "\n\n\n";
+            }
         }
 
         if (response.equals(""))
