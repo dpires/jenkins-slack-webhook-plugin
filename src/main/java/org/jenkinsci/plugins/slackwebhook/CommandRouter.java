@@ -78,12 +78,18 @@ public class CommandRouter {
         }
 
         if (message == null) {
-            String error = "Unknown command ("+command+") try the following:\n";
+            String response = "*Help:*\n";
+            if (command.split("\\s+").length > 1)
+                response += "`"+command+"` _is an unknown command, try one of the following:_\n\n";
+            else
+                response += "\n";
+            
             for (PatternAction route : routes) {
-                error += route.command + " - " + route.commandDescription;
-                error += "\n";
+                response += "`"+route.command+"`\n```"+route.commandDescription+"```";
+                response += "\n\n";
             } 
-            throw new CommandRouterException(error);
+
+            throw new CommandRouterException(response);
         }
 
         return message;

@@ -73,12 +73,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             return new JsonResponse(new SlackTextMessage("Invalid Slack token"),
                 StaplerResponse.SC_OK); 
     
-        //
-        // strip trigger word from command
-        // "TRIGGER_WORD run api-build" => "run api-build"
-        //
-        String command =
-            data.getText().replace(data.getTrigger_word(), "").trim();
+        String triggerWord = data.getTrigger_word();
 
         //
         // TODO: figure out better way of injecting slack user data into handler
@@ -87,10 +82,21 @@ public class WebhookEndpoint implements UnprotectedRootAction {
 
         try {
             SlackTextMessage msg = new CommandRouter()
-                .addRoute("^list projects", "jenkins list projects", "Lists buildable projects", this, "listProjects")
-                .addRoute("^run ([a-zA-Z-\\.]+)", "jenkins run <project_name>", "Schedule run for <project_name>", this, "scheduleJob")
-                .addRoute("^get ([a-zA-Z-\\.]+) #([0-9]+) log", "jenkins get <project-name> #<build_number> log", "Returns 25 lines of the log for build <build_number> of <project_name>", this, "getProjectLog")
-                .route(command);
+                .addRoute("^"+triggerWord+" list projects",
+                    triggerWord+" list projects", "Return a list of buildable projects",
+                    this,
+                    "listProjects")
+                .addRoute("^"+triggerWord+" run ([a-zA-Z-\\.]+)",
+                    triggerWord+" run <project_name>",
+                    "Schedule a run for <project_name>",
+                    this,
+                    "scheduleJob")
+                .addRoute("^"+triggerWord+" get ([a-zA-Z-\\.]+) #([0-9]+) log",
+                    triggerWord+" get <project-name> #<build_number> log",
+                    "Return a truncated log for build #<build_number> of <project_name>",
+                    this,
+                "getProjectLog")
+                .route(data.getText());
 
             return new JsonResponse(msg, StaplerResponse.SC_OK);
             
