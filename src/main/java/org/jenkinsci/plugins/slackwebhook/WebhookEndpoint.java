@@ -123,10 +123,12 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             return new SlackTextMessage("Error occured returning log: "+ex.getMessage());
         }
 
-        String response = "";
+        String response = "*"+projectName+"* *#"+buildNumber+"*\n";
+        response += "```";
         for (String line : log) {
             response += line + "\n";
         }
+        response += "```";
         return new SlackTextMessage(response);
     }
 
@@ -154,18 +156,21 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         ACL.impersonate(ACL.SYSTEM);
         String response = "*Projects:*\n";
 
-        for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+        List<AbstractProject> jobs =
+            Jenkins.getInstance().getAllItems(AbstractProject.class);
+
+        for (AbstractProject job : jobs) {
             if (job.isBuildable()) {
                 AbstractBuild lastBuild = job.getLastBuild();
                 String buildNumber = Integer.toString(lastBuild.getNumber());
-                String status = lastBuild.getResult().toString().toLowerCase();
-                response += ">*"+job.getDisplayName() + "*\n>*Status:* _"+status+"_\n>*Last Build:* #"+buildNumber;
+                String status = lastBuild.getResult().toString();
+                response += ">*"+job.getDisplayName() + "*\n>*Last Build:* #"+buildNumber+"\n>*Status:* "+status;
                 response += "\n\n\n";
             }
         }
 
-        if (response.equals(""))
-            response = "No projects found\n";
+        if (jobs.size() == 0)
+            response += ">_No projects found_";
 
         return new SlackTextMessage(response);
     }
