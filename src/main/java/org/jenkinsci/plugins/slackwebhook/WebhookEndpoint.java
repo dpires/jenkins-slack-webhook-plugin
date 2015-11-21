@@ -63,7 +63,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     public HttpResponse doIndex(StaplerRequest req) throws IOException,
         ServletException {
 
-        if (globalConfig.getSlackToken() == null) {
+        if (globalConfig.getSlackOutgoingWebhookToken() == null) {
             return new JsonResponse(new SlackTextMessage("Slack token not set"),
                 StaplerResponse.SC_OK); 
         }
@@ -71,7 +71,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         SlackPostData data = new SlackPostData();
         req.bindParameters(data);
 
-        if (!globalConfig.getSlackToken().equals(data.getToken()))
+        if (!globalConfig.getSlackOutgoingWebhookToken().equals(data.getToken()))
             return new JsonResponse(new SlackTextMessage("Invalid Slack token"),
                 StaplerResponse.SC_OK); 
     
