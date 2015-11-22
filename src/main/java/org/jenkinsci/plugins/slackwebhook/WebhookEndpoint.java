@@ -90,12 +90,12 @@ public class WebhookEndpoint implements UnprotectedRootAction {
                 triggerWord+" list projects", "Return a list of buildable projects",
                 this,
                 "listProjects")
-            .addRoute("^"+triggerWord+" run ([a-zA-Z-\\.]+)",
+            .addRoute("^"+triggerWord+" run ([a-zA-Z0-9_\\-\\.]+)",
                 triggerWord+" run <project_name>",
                 "Schedule a run for <project_name>",
                 this,
                 "scheduleJob")
-            .addRoute("^"+triggerWord+" get ([a-zA-Z-\\.]+) #([0-9]+) log",
+            .addRoute("^"+triggerWord+" get ([a-zA-Z0-9_\\-\\.]+) #([0-9]+) log",
                 triggerWord+" get <project-name> #<build_number> log",
                 "Return a truncated log for build #<build_number> of <project_name>",
                 this,
