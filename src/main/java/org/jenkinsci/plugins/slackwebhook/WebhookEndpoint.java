@@ -7,6 +7,7 @@ import jenkins.model.GlobalConfiguration;
 import hudson.Extension;
 
 import hudson.model.Build;
+import hudson.model.Result;
 import hudson.model.Project;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -125,7 +126,12 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             return new JsonResponse(new SlackTextMessage(response), StaplerResponse.SC_OK);
 
         } catch (CommandRouterException ex) {
+            LOGGER.warning(ex.getMessage());
             return new JsonResponse(new SlackTextMessage(ex.getMessage()), StaplerResponse.SC_OK);
+
+        } catch (Exception ex) {
+            LOGGER.warning(ex.getMessage());
+            return new JsonResponse(new SlackTextMessage("An error occured: "+ ex.getMessage()), StaplerResponse.SC_OK);
         }
     }
 
@@ -195,15 +201,25 @@ public class WebhookEndpoint implements UnprotectedRootAction {
                 String buildNumber = "TBD";
                 String status = "TBD";
                 if (lastBuild != null) {
+
                     buildNumber = Integer.toString(lastBuild.getNumber());
-                    status = lastBuild.getResult().toString();
+
+                    if (lastBuild.isBuilding()) {
+                        status = "BUILDING";
+                    }
+
+                    Result result = lastBuild.getResult();
+
+                    if (result != null) {
+                        status = result.toString();
+                    }
                 }
                 response += ">*"+job.getDisplayName() + "*\n>*Last Build:* #"+buildNumber+"\n>*Status:* "+status;
                 response += "\n\n\n";
             }
         }
 
-        if (jobs.size() == 0)
+        if (jobs == null || jobs.size() == 0)
             response += ">_No projects found_";
 
         return new SlackTextMessage(response);
