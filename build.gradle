@@ -44,3 +44,7 @@ clean {
     delete ".gradle/"
     delete "work/"
 }
+
+tasks.withType(JavaCompile) {
+    options.warnings = false
+}
