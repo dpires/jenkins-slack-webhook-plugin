@@ -192,8 +192,12 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         for (AbstractProject job : jobs) {
             if (job.isBuildable()) {
                 AbstractBuild lastBuild = job.getLastBuild();
-                String buildNumber = Integer.toString(lastBuild.getNumber());
-                String status = lastBuild.getResult().toString();
+                String buildNumber = "TBD";
+                String status = "TBD";
+                if (lastBuild != null) {
+                    buildNumber = Integer.toString(lastBuild.getNumber());
+                    status = lastBuild.getResult().toString();
+                }
                 response += ">*"+job.getDisplayName() + "*\n>*Last Build:* #"+buildNumber+"\n>*Status:* "+status;
                 response += "\n\n\n";
             }
